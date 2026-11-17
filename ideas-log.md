@@ -21,3 +21,12 @@
 - **Runner-up niches considered:** WalletCluster Meme / holder-wallet cluster explainer; meme coin narrative-to-data checker; token comparison battle cards; evidence-backed meme coin social cards.
 - **Repo/preview URL:** https://github.com/caytec/launchproof-ai-mvp-20261117 ; https://caytec.github.io/launchproof-ai-mvp-20261117/
 - **Release status:** **Live static MVP; not public-launch ready.** GitHub Pages build is healthy and the frontend loads, but `/api/generate.js` is not executable on GitHub Pages; no Vercel API deployment is live or connected, so server-backed analysis is unavailable and the demo uses deterministic fallback output.
+
+## 2026-11-17 — TrackProof
+- **Chosen niche:** Paid-campaign tracking QA and attribution handoff.
+- **Tool name:** TrackProof.
+- **Description:** A rules-first UTM checker that generates clean campaign URLs, catches tracking mistakes, suggests campaign/event naming, and creates a launch-ready tracking contract.
+- **Keywords:** UTM checker; UTM audit tool; campaign tracking QA; tracking contract; campaign tracking checklist; UTM link checker.
+- **Runner-up niches considered:** local review-recovery cards; content freshness checking; creator-deal scoping; ad-to-landing-page message matching.
+- **Repo/preview URL:** https://github.com/caytec/trackproof-mvp-20261117/ ; https://caytec.github.io/trackproof-mvp-20261117/
+- **Release status:** **Conditional preview / not production-ready.** GitHub Pages static frontend is accessible and the rules-only UTM audit flow is present. Vercel API has not been imported, deployed, or live-tested; browser regression, escaping, Pages build completion, PNG/JPEG OG support, automated checks, and stronger rate limiting remain release blockers.
