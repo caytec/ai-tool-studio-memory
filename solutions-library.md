@@ -121,15 +121,15 @@ const prompt = "Return JSON only with one string field summary. Summarize this e
 
 ```js
 async function requestReport(input) {
-  var response = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input)
-  });
-  if (!response.ok) throw new Error("API request failed");
-  var data = await response.json();
-  if (!validReport(data)) throw new Error("Invalid report");
-  return data;
+ var response = await fetch(API_URL, {
+ method: "POST",
+ headers: { "Content-Type": "application/json" },
+ body: JSON.stringify(input)
+ });
+ if (!response.ok) throw new Error("API request failed");
+ var data = await response.json();
+ if (!validReport(data)) throw new Error("Invalid report");
+ return data;
 }
 ```
 
@@ -139,24 +139,24 @@ async function requestReport(input) {
 
 ```js
 form.addEventListener("submit", async function (event) {
-  event.preventDefault();
-  if (busy) return;
-  busy = true;
-  submitButton.disabled = true;
-  status.textContent = "Checking campaign structure…";
-  var input = readInput();
-  var local = fallback(input);
-  render(local);
-  try {
-    var remote = await requestReport(input);
-    render(remote);
-    status.textContent = "Audit complete.";
-  } catch (error) {
-    status.textContent = "API unavailable. A rules-only audit is ready.";
-  } finally {
-    busy = false;
-    submitButton.disabled = false;
-  }
+ event.preventDefault();
+ if (busy) return;
+ busy = true;
+ submitButton.disabled = true;
+ status.textContent = "Checking campaign structure…";
+ var input = readInput();
+ var local = fallback(input);
+ render(local);
+ try {
+ var remote = await requestReport(input);
+ render(remote);
+ status.textContent = "Audit complete.";
+ } catch (error) {
+ status.textContent = "API unavailable. A rules-only audit is ready.";
+ } finally {
+ busy = false;
+ submitButton.disabled = false;
+ }
 });
 ```
 
@@ -166,9 +166,9 @@ form.addEventListener("submit", async function (event) {
 
 ```js
 function validReport(report) {
-  return report && typeof report.finalUrl === "string" &&
-    ["ready", "review", "blocked"].indexOf(report.status) !== -1 &&
-    Array.isArray(report.issues);
+ return report && typeof report.finalUrl === "string" &&
+ ["ready", "review", "blocked"].indexOf(report.status) !== -1 &&
+ Array.isArray(report.issues);
 }
 ```
 
@@ -181,35 +181,35 @@ const controller = new AbortController();
 const timer = setTimeout(() => controller.abort(), 8000);
 
 try {
-  let response;
-  if (provider === "gemini") {
-    response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key), {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({contents: [{parts: [{text: prompt}]}]}),
-      signal: controller.signal
-    });
-  } else if (provider === "groq") {
-    response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {"Content-Type": "application/json", Authorization: "Bearer " + key},
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        temperature: 0,
-        max_tokens: 180,
-        response_format: {type: "json_object"},
-        messages: [{role: "user", content: prompt}]
-      }),
-      signal: controller.signal
-    });
-  } else {
-    return base;
-  }
-  if (!response.ok) return base;
+ let response;
+ if (provider === "gemini") {
+ response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key), {
+ method: "POST",
+ headers: {"Content-Type": "application/json"},
+ body: JSON.stringify({contents: [{parts: [{text: prompt}]}]}),
+ signal: controller.signal
+ });
+ } else if (provider === "groq") {
+ response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+ method: "POST",
+ headers: {"Content-Type": "application/json", Authorization: "Bearer " + key},
+ body: JSON.stringify({
+ model: "llama-3.1-8b-instant",
+ temperature: 0,
+ max_tokens: 180,
+ response_format: {type: "json_object"},
+ messages: [{role: "user", content: prompt}]
+ }),
+ signal: controller.signal
+ });
+ } else {
+ return base;
+ }
+ if (!response.ok) return base;
 } catch (error) {
-  return base;
+ return base;
 } finally {
-  clearTimeout(timer);
+ clearTimeout(timer);
 }
 ```
 
@@ -219,11 +219,65 @@ try {
 
 ```js
 function hasSensitive(value) {
-  return /[\w.+-]+@[\w-]+\.[\w.-]+/.test(value) ||
-    /(?:\+?\d[\d\s().-]{7,}\d)/.test(value) ||
-    /(?:api[_-]?key|token|secret|password)[=:_-]/i.test(value) ||
-    /^[A-Za-z0-9_-]{28,}$/.test(value);
+ return /[\\w.+-]+@[\\w-]+\\.[\\w.-]+/.test(value) ||
+ /(?:\\+?\\d[\\d\\s().-]{7,}\\d)/.test(value) ||
+ /(?:api[_-]?key|token|secret|password)[=:_-]/i.test(value) ||
+ /^[A-Za-z0-9_-]{28,}$/.test(value);
 }
 ```
 
 **QA note:** Source audit found explicit email, phone-like, credential-label, and long-token checks applied to UTM fields. This is heuristic warning/blocking logic, not a complete privacy detector.
+
+## 2026-11-17 — ClientShield additions
+
+### 1. Response schema validation — Unverified
+
+```javascript
+function validReport(report) {
+  return report && Number.isFinite(report.score) && report.score >= 0 && report.score <= 100 &&
+    ["Low","Moderate","High","Critical"].indexOf(report.level) !== -1 &&
+    typeof report.summary === "string" && Array.isArray(report.flags) &&
+    Array.isArray(report.questions) && typeof report.reply === "string";
+}
+```
+
+**QA caveat:** Code audit found explicit score bounds, level allow-listing, summary type validation, and array checks. The live API was not deployed or runtime-tested, so this remains Unverified.
+
+### 2. Complete client API request and response validation — Unverified
+
+```javascript
+async function requestReport(input) {
+  var response = await fetch(window.API_URL, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+  if (!response.ok) throw new Error("API request failed");
+  var data = await response.json();
+  if (!validReport(data)) throw new Error("Invalid report");
+  return data;
+}
+```
+
+**QA caveat:** Source contains a complete JSON request body, content type, non-OK handling, JSON parsing, and schema validation. Live endpoint behavior was not tested because no runtime deployment exists.
+
+### 3. Deterministic fallback with evidence-preserving AI merge — Unverified
+
+```javascript
+function cleanReport(report, base) {
+  if (!validReport(report)) return base;
+  report.score = Math.max(base.score, Math.min(100, Math.round(report.score)));
+  report.level = report.score >= 75 ? "Critical" : report.score >= 50 ? "High" : report.score >= 25 ? "Moderate" : "Low";
+  report.flags = base.flags;
+  report.questions = report.questions.filter((item) => typeof item === "string").slice(0, 5);
+  report.reply = report.reply.slice(0, 1200);
+  report.summary = report.summary.slice(0, 900);
+  return report;
+}
+```
+
+**QA caveat:** Code audit found that provider output cannot lower the deterministic baseline score and that baseline flags are retained. Provider runtime and malformed-output behavior remain unverified.
+
+### 4. Client IP extraction for lightweight rate limiting — Unverified
+
+```javascript
+function clientIp(req) { return String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown").split(",")[0].trim(); }
+```
+
+**QA caveat:** Source audit found proxy-header parsing used by the in-memory limiter. It is not durable across serverless instances and must not be treated as production-grade abuse prevention.

@@ -30,3 +30,12 @@
 - **Runner-up niches considered:** local review-recovery cards; content freshness checking; creator-deal scoping; ad-to-landing-page message matching.
 - **Repo/preview URL:** https://github.com/caytec/trackproof-mvp-20261117/ ; https://caytec.github.io/trackproof-mvp-20261117/
 - **Release status:** **Conditional preview / not production-ready.** GitHub Pages static frontend is accessible and the rules-only UTM audit flow is present. Vercel API has not been imported, deployed, or live-tested; browser regression, escaping, Pages build completion, PNG/JPEG OG support, automated checks, and stronger rate limiting remain release blockers.
+
+## 2026-11-17 — ClientShield
+- **Chosen niche:** Freelance client, job-post, and payment-risk screening.
+- **Tool name:** ClientShield — a no-signup freelance scam checker.
+- **Description:** Paste a freelance job post or client message to receive an explainable risk report, verification checklist, safer reply, and privacy-safe share card.
+- **Keywords:** freelance scam checker; fake client message checker; freelance job scam detector; freelance payment scam; freelance contract red flags.
+- **Runner-up niches considered:** side-hustle opportunity legitimacy checker; template profitability calculator; scope-creep and payment-term checker; resale authenticity and scam-risk explainer.
+- **Repo/preview URL:** https://github.com/caytec/clientshield-mvp-20261117 ; https://caytec.github.io/clientshield-mvp-20261117/
+- **Release status:** **NO-GO for production / partial deployment only.** Live re-audit found the homepage and supporting pages load, but live `js/app.js` is corrupted, `assets/og.png` returns 404, the AI API is not deployed to a runtime, and the privacy page lacks a real monitored contact. Rules-only experience can proceed after JavaScript repair; production approval is blocked.
