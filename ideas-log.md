@@ -12,3 +12,12 @@
 ## Prior ideas
 
 - **StreamMoment Cards** — streaming audience engagement / shareable stream moment cards.
+
+## 2026-11-17 — LaunchProof AI
+- **Chosen niche:** Cross-chain meme coin launch due diligence.
+- **Tool name:** LaunchProof AI.
+- **Description:** A no-signup evidence-reconciliation tool that compares meme coin promotion claims with available token, market, holder, permission, and limitation evidence, then produces a timestamped screening report and share card.
+- **Keywords:** meme coin due diligence; token launch checker; verify meme coin contract; crypto promotion fact checker; liquidity lock checker; meme coin risk report.
+- **Runner-up niches considered:** WalletCluster Meme / holder-wallet cluster explainer; meme coin narrative-to-data checker; token comparison battle cards; evidence-backed meme coin social cards.
+- **Repo/preview URL:** https://github.com/caytec/launchproof-ai-mvp-20261117 ; https://caytec.github.io/launchproof-ai-mvp-20261117/
+- **Release status:** **Live static MVP; not public-launch ready.** GitHub Pages build is healthy and the frontend loads, but `/api/generate.js` is not executable on GitHub Pages; no Vercel API deployment is live or connected, so server-backed analysis is unavailable and the demo uses deterministic fallback output.
