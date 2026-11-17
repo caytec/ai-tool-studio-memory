@@ -1,10 +1,14 @@
 # Ideas Log
 
-## 2026-11-17 — StreamMoment Cards
-- **Chosen niche:** Streaming audience engagement / shareable stream moment cards
-- **Tool name:** StreamMoment Cards
-- **Description:** No-signup tool that turns a streamer-described moment or chat quote into an editable social card and ready-to-post captions.
-- **Keywords:** stream highlight card generator; Twitch quote card generator; stream recap generator; chat reaction card; gaming highlight caption generator
-- **Runner-up niches considered:** Game-specific challenge generation (Chat Chooses the Challenge); viewer-custom game rules; tournament watch-party briefing; AI poll/quiz/prediction builder.
-- **Live repo/preview URL:** https://github.com/caytec/streammoment-cards-mvp-20261117 ; preview unavailable — expected GitHub Pages URL returns 404: https://caytec.github.io/streammoment-cards-mvp-20261117/
-- **Release status:** BLOCKED — repository incomplete, GitHub Pages not enabled, placeholders remain, API/configuration files are missing, and no working live demo is verified.
+## 2026-11-17 — LootLens ABI
+- **Chosen niche:** Arena Breakout: Infinite contextual loot decisions.
+- **Tool name:** LootLens ABI.
+- **Description:** A no-signup, rules-first tool recommending Keep, Sell, Use, Extract, or Leave using item value, inventory space, mission relevance, raid position, and risk.
+- **Keywords:** arena breakout infinite loot calculator; ABI keep or sell; ABI loot value per slot; arena breakout infinite mission items; ABI loot decision tool.
+- **Runner-up niches considered:** ABI budget-aware raid/loadout planning (recommended in the research report as RaidBudget ABI); ABI mission preparation; ABI extraction route risk planning; ABI weapon/ammunition optimization.
+- **Repo/preview URL:** https://github.com/caytec/lootlens-abi-mvp-20261117; planned Pages URL https://caytec.github.io/lootlens-abi-mvp-20261117/.
+- **Release status:** **NO-GO / deployment blocked** — live re-audit found the planned GitHub Pages URL returns GitHub Pages 404; the repository was not created, no files were deployed, and Vercel was not imported or configured.
+
+## Prior ideas
+
+- **StreamMoment Cards** — streaming audience engagement / shareable stream moment cards.
