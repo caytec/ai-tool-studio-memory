@@ -393,9 +393,9 @@ try {
 
 ```javascript
 function validRemote(data) {
-  return data && typeof data.title === "string" && data.title.length <= 40 &&
-    typeof data.verdict === "string" && data.verdict.length <= 220 &&
-    typeof data.squadMessage === "string" && data.squadMessage.length <= 220;
+ return data && typeof data.title === "string" && data.title.length <= 40 &&
+ typeof data.verdict === "string" && data.verdict.length <= 220 &&
+ typeof data.squadMessage === "string" && data.squadMessage.length <= 220;
 }
 ```
 
@@ -405,15 +405,15 @@ function validRemote(data) {
 
 ```javascript
 function encodedUrl(result) {
-  var data = {
-    v: 1, map: result.input.map, mode: result.input.mode,
-    loadoutCost: result.input.loadoutCost, extractedLoot: result.input.extractedLoot,
-    ammoCost: result.input.ammoCost, consumableCost: result.input.consumableCost,
-    entryCost: result.input.entryCost, survived: result.input.survived,
-    kills: result.input.kills, assists: result.input.assists, revives: result.input.revives,
-    tone: result.input.tone
-  };
-  return SITE_URL + "/?d=" + encodeURIComponent(btoa(JSON.stringify(data)));
+ var data = {
+ v: 1, map: result.input.map, mode: result.input.mode,
+ loadoutCost: result.input.loadoutCost, extractedLoot: result.input.extractedLoot,
+ ammoCost: result.input.ammoCost, consumableCost: result.input.consumableCost,
+ entryCost: result.input.entryCost, survived: result.input.survived,
+ kills: result.input.kills, assists: result.input.assists, revives: result.input.revives,
+ tone: result.input.tone
+ };
+ return SITE_URL + "/?d=" + encodeURIComponent(btoa(JSON.stringify(data)));
 }
 ```
 
@@ -425,12 +425,12 @@ function encodedUrl(result) {
 var local = localResult(input);
 render(local);
 try {
-  var remote = await requestAI(input, local.calc);
-  local.copy.title = remote.title;
-  local.copy.verdict = remote.verdict;
-  render(local);
+ var remote = await requestAI(input, local.calc);
+ local.copy.title = remote.title;
+ local.copy.verdict = remote.verdict;
+ render(local);
 } catch (error) {
-  errorBox.textContent = "Rules-only receipt ready. Optional AI was unavailable.";
+ errorBox.textContent = "Rules-only receipt ready. Optional AI was unavailable.";
 }
 ```
 
@@ -442,11 +442,95 @@ try {
 var previous = hits.get(ip) || [];
 previous = previous.filter(function (time) { return now - time < 60000; });
 if (previous.length >= 20) {
-  res.status(429).json({ error: "Rate limit exceeded" });
-  return;
+ res.status(429).json({ error: "Rate limit exceeded" });
+ return;
 }
 previous.push(now);
 hits.set(ip, previous);
 ```
 
 **QA caveat:** Source audit found a 20-request/60-second in-memory limiter. It is best-effort only and is not durable across serverless instances.
+
+## 2026-11-18 — AlbumClub Kit additions
+
+### 1. Album discussion-kit schema validation — Unverified
+
+```js
+function validKit(item, input) {
+  return item && typeof item.overview === "string" && item.overview.length <= 700 &&
+    Array.isArray(item.questions) && item.questions.length === 10 &&
+    item.questions.every(function (x) { return typeof x === "string" && x.length <= 300 && !/[<>]/.test(x); }) &&
+    Array.isArray(item.prompts) && item.prompts.length === input.tracks.length &&
+    item.prompts.every(function (x) { return x && typeof x.track === "string" && typeof x.prompt === "string" && x.prompt.length <= 300 && !/[<>]/.test(x.prompt); }) &&
+    item.poll && typeof item.poll.question === "string" && Array.isArray(item.poll.options) &&
+    item.poll.options.length >= 2 && item.poll.options.length <= 4 &&
+    Array.isArray(item.agenda) && item.agenda.length >= 3 && item.agenda.length <= 5 &&
+    typeof item.rating === "string";
+}
+```
+
+**QA caveat:** Code audit found bounded fields, exact question count, track-prompt cardinality, poll bounds, agenda bounds, and basic angle-bracket rejection. The live API was not deployed or runtime-tested, so this remains Unverified.
+
+### 2. Input normalization with allow-lists — Unverified
+
+```js
+function normalize(input) {
+  const tracks = Array.isArray(input.tracks) ? input.tracks.map(function (item) {
+    return clean(item, 100);
+  }).filter(Boolean).slice(0, 15) : [];
+  return {
+    album: clean(input.album, 100),
+    artist: clean(input.artist, 100),
+    tracks: tracks,
+    context: ["Friends", "Classroom", "Podcast", "Fan group", "Solo reflection"].includes(input.context) ? input.context : "Friends",
+    depth: ["Casual", "Thoughtful", "Deep dive"].includes(input.depth) ? input.depth : "Thoughtful",
+    favorite: clean(input.favorite, 100),
+    least: clean(input.least, 100),
+    impression: clean(input.impression, 500),
+    spoilers: Boolean(input.spoilers)
+  };
+}
+```
+
+**QA caveat:** Code audit found per-field cleaning, track limits, and allow-lists for context/depth. The deployed endpoint and malformed-body cases were not live-tested, so this remains Unverified.
+
+### 3. Versioned encoded share URL — Unverified
+
+```js
+function encodedUrl(input, kit) {
+  var data = {v: 1, input: input, kit: kit};
+  return SITE_URL + "?d=" + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))));
+}
+```
+
+**QA caveat:** Code audit found a version marker and encoded input/output for project-path-safe sharing. Browser reload, URL-size behavior, and privacy implications require manual verification.
+
+### 4. Deterministic rules-first kit with optional provider enhancement — Unverified
+
+```js
+var local = fallback(input);
+render(local, input);
+try {
+  var remote = await requestKit(input);
+  render(remote, input);
+  status.textContent = "Kit ready. Edit any prompt before sharing.";
+} catch (error) {
+  status.textContent = "The API was unavailable. A rules-only kit is ready.";
+}
+```
+
+**QA caveat:** Source audit found immediate fallback rendering, optional remote enhancement, user-visible fallback messaging, and duplicate-submit protection. No deployed API or real-browser acceptance run was available.
+
+### 5. Client IP rate window — Unverified
+
+```js
+var previous = (hits.get(ip) || []).filter(function (time) { return now - time < 60000; });
+if (previous.length >= 12) {
+  res.status(429).json({error: "Rate limit exceeded"});
+  return;
+}
+previous.push(now);
+hits.set(ip, previous);
+```
+
+**QA caveat:** Source audit found a 12-request/60-second in-memory limiter. It is best-effort only and is not durable across serverless instances.

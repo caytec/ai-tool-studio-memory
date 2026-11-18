@@ -57,3 +57,12 @@
 - **Runner-up niches considered:** RaidRules ABI creator and squad challenge-card generator; ABI raid ruleset generator; ABI gear-fear/confidence raid selector; ABI zero-to-hero planner.
 - **Repo/preview URL:** https://github.com/caytec/raidreceipt-abi-mvp-20261118 ; https://caytec.github.io/raidreceipt-abi-mvp-20261118/
 - **Release status:** **Live, static rules-only MVP.** The previous GitHub Pages 404/building issue is resolved; core calculator files, legal pages, SEO assets, and share functionality are published. Optional AI is not enabled because the Vercel API has not been deployed or connected. Browser execution, accessibility, and download/share behavior still require final manual verification.
+
+## 2026-11-18 — AlbumClub Kit
+- **Chosen niche:** Music, specifically album listening-club discussion.
+- **Tool name:** AlbumClub Kit.
+- **Description:** A no-signup album discussion-kit generator that turns a user-supplied album, artist, tracklist, context, depth, and optional reactions into questions, track prompts, polls, an agenda, editable output, share URLs, and a downloadable discussion card.
+- **Keywords:** album discussion questions; album listening club questions; track-by-track discussion questions; music discussion questions; album club kit.
+- **Runner-up niches considered:** SetlistFlow live-performance setlist transition planning; SongSprint music trivia cards; SongStory Kit behind-the-song promotion; AlbumArc emotional journey maps.
+- **Repo/preview URL:** https://github.com/caytec/albumclub-kit-mvp-20261118 ; https://caytec.github.io/albumclub-kit-mvp-20261118/
+- **Release status:** **Static MVP available for stakeholder review; conditional approval for browser QA only.** The GitHub Pages build was reported as `building` and the preview returned `Site not found · GitHub Pages` / `404` / `There isn't a GitHub Pages site here.` The Vercel API is not deployed or live-tested, so AI generation is unavailable and the demo is rules-only by default. Production approval is blocked by Pages propagation, browser QA, placeholder privacy contact, provider credential hardening, and production-domain configuration.
