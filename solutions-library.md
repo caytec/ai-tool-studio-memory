@@ -234,10 +234,10 @@ function hasSensitive(value) {
 
 ```javascript
 function validReport(report) {
-  return report && Number.isFinite(report.score) && report.score >= 0 && report.score <= 100 &&
-    ["Low","Moderate","High","Critical"].indexOf(report.level) !== -1 &&
-    typeof report.summary === "string" && Array.isArray(report.flags) &&
-    Array.isArray(report.questions) && typeof report.reply === "string";
+ return report && Number.isFinite(report.score) && report.score >= 0 && report.score <= 100 &&
+ ["Low","Moderate","High","Critical"].indexOf(report.level) !== -1 &&
+ typeof report.summary === "string" && Array.isArray(report.flags) &&
+ Array.isArray(report.questions) && typeof report.reply === "string";
 }
 ```
 
@@ -247,11 +247,11 @@ function validReport(report) {
 
 ```javascript
 async function requestReport(input) {
-  var response = await fetch(window.API_URL, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
-  if (!response.ok) throw new Error("API request failed");
-  var data = await response.json();
-  if (!validReport(data)) throw new Error("Invalid report");
-  return data;
+ var response = await fetch(window.API_URL, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+ if (!response.ok) throw new Error("API request failed");
+ var data = await response.json();
+ if (!validReport(data)) throw new Error("Invalid report");
+ return data;
 }
 ```
 
@@ -261,14 +261,14 @@ async function requestReport(input) {
 
 ```javascript
 function cleanReport(report, base) {
-  if (!validReport(report)) return base;
-  report.score = Math.max(base.score, Math.min(100, Math.round(report.score)));
-  report.level = report.score >= 75 ? "Critical" : report.score >= 50 ? "High" : report.score >= 25 ? "Moderate" : "Low";
-  report.flags = base.flags;
-  report.questions = report.questions.filter((item) => typeof item === "string").slice(0, 5);
-  report.reply = report.reply.slice(0, 1200);
-  report.summary = report.summary.slice(0, 900);
-  return report;
+ if (!validReport(report)) return base;
+ report.score = Math.max(base.score, Math.min(100, Math.round(report.score)));
+ report.level = report.score >= 75 ? "Critical" : report.score >= 50 ? "High" : report.score >= 25 ? "Moderate" : "Low";
+ report.flags = base.flags;
+ report.questions = report.questions.filter((item) => typeof item === "string").slice(0, 5);
+ report.reply = report.reply.slice(0, 1200);
+ report.summary = report.summary.slice(0, 900);
+ return report;
 }
 ```
 
@@ -281,3 +281,108 @@ function clientIp(req) { return String(req.headers["x-forwarded-for"] || req.soc
 ```
 
 **QA caveat:** Source audit found proxy-header parsing used by the in-memory limiter. It is not durable across serverless instances and must not be treated as production-grade abuse prevention.
+
+## 2026-11-18 — StreamGap additions
+
+### 1. Output schema validation with bounded fields — Unverified
+
+```js
+function validOutput(item, input) {
+  return item && typeof item.opening === "string" && item.opening.length <= 500 &&
+    Array.isArray(item.prompts) && item.prompts.length === 3 &&
+    item.prompts.every(function (x) { return typeof x === "string" && x.length <= 300; }) &&
+    item.poll && typeof item.poll.question === "string" &&
+    Array.isArray(item.poll.options) && item.poll.options.length >= 2 && item.poll.options.length <= 4 &&
+    item.poll.options.every(function (x) { return typeof x === "string" && x.length <= 100; }) &&
+    item.mini_game && typeof item.mini_game.name === "string" &&
+    typeof item.mini_game.rules === "string" &&
+    Number.isFinite(item.mini_game.duration_seconds) &&
+    item.mini_game.duration_seconds <= input.duration &&
+    typeof item.transition_back === "string" && item.transition_back.length <= 500 &&
+    typeof item.chat_command_copy === "string" && item.chat_command_copy.length <= 500 &&
+    typeof item.safety_note === "string" && item.safety_note.length <= 500;
+}
+```
+
+**QA caveat:** Code audit found explicit array cardinality, type, length, and duration bounds. The live provider/API was not deployed or tested, so this is Unverified.
+
+### 2. Complete client API request and response validation — Unverified
+
+```js
+async function requestOutput(input) {
+  var response = await fetch(API_URL, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error("API request failed");
+  var data = await response.json();
+  if (!validOutput(data)) throw new Error("Invalid output");
+  return data;
+}
+```
+
+**QA caveat:** Source audit found the complete JSON request body, content type, non-OK handling, JSON parsing, and schema validation. The Vercel API was not deployed or live-tested.
+
+### 3. Accessible duplicate-submit guard with deterministic fallback — Unverified
+
+```js
+if (busy) return;
+busy = true;
+button.disabled = true;
+status.textContent = "Building a useful gap segment…";
+var input = readInput();
+var local = fallback(input);
+render(local);
+try {
+  var remote = await requestOutput(input);
+  render(remote);
+  status.textContent = "Segment ready.";
+} catch (error) {
+  status.textContent = "The API was unavailable. A curated fallback is ready.";
+} finally {
+  busy = false;
+  button.disabled = false;
+}
+```
+
+**QA caveat:** Source audit found the duplicate-submit guard, disabled control, live status, immediate local fallback, and cleanup. A real deployed/browser acceptance test remains outstanding.
+
+### 4. Provider timeout and environment-only API key handling — Unverified
+
+```js
+const controller = new AbortController();
+const timer = setTimeout(function () { controller.abort(); }, 8000);
+
+try {
+  let response;
+  if (provider === "gemini") {
+    response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key), {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({contents: [{parts: [{text: prompt}]}]}),
+      signal: controller.signal
+    });
+  } else if (provider === "groq") {
+    response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "Authorization": "Bearer " + key},
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        temperature: 0.4,
+        max_tokens: 700,
+        response_format: {type: "json_object"},
+        messages: [{role: "user", content: prompt}]
+      }),
+      signal: controller.signal
+    });
+  }
+  if (!response.ok) return null;
+} catch (error) {
+  return null;
+} finally {
+  clearTimeout(timer);
+}
+```
+
+**QA caveat:** Source audit found provider allow-listing, environment-only keys, provider-specific request bodies, authorization, timeout, and null fallback. No live provider/API deployment was available, so runtime behavior remains Unverified.

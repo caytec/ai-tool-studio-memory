@@ -39,3 +39,12 @@
 - **Runner-up niches considered:** side-hustle opportunity legitimacy checker; template profitability calculator; scope-creep and payment-term checker; resale authenticity and scam-risk explainer.
 - **Repo/preview URL:** https://github.com/caytec/clientshield-mvp-20261117 ; https://caytec.github.io/clientshield-mvp-20261117/
 - **Release status:** **NO-GO for production / partial deployment only.** Live re-audit found the homepage and supporting pages load, but live `js/app.js` is corrupted, `assets/og.png` returns 404, the AI API is not deployed to a runtime, and the privacy page lacks a real monitored contact. Rules-only experience can proceed after JavaScript repair; production approval is blocked.
+
+## 2026-11-18 — StreamGap
+- **Chosen niche:** Ad-break and dead-air rescue prompts for streamers.
+- **Tool name:** StreamGap.
+- **Description:** A no-signup utility that turns a game, downtime reason, remaining minutes, and channel tone into a ready-to-run mini-segment with prompts, a poll, a mini-game, transition copy, chatbot-ready text, and a downloadable card.
+- **Keywords:** stream filler generator; Twitch ad break ideas generator; stream dead air ideas; loading screen stream prompts; quiet Twitch chat ideas; Twitch chat prompt generator.
+- **Runner-up niches considered:** Gaming challenge/ruleset generator (ChallengeForge); raid handoff assistant (RaidReady); viewer question-to-stream segment planner (SegmentSpark); live audience prompt deck (PromptDeck Live).
+- **Repo/preview URL:** https://github.com/caytec/streamgap-mvp-20261118 ; https://caytec.github.io/streamgap-mvp-20261118/
+- **Release status:** **Deployment incomplete / blocked by GitHub Pages propagation or build failure.** The public repository and root files exist and Pages was configured from `main` root, but the latest build remained `building` and the preview returned HTTP 404 / “There isn't a GitHub Pages site here.” The Vercel API is also not deployed or live-tested, so the end-to-end release is blocked.
