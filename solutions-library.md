@@ -288,19 +288,19 @@ function clientIp(req) { return String(req.headers["x-forwarded-for"] || req.soc
 
 ```js
 function validOutput(item, input) {
-  return item && typeof item.opening === "string" && item.opening.length <= 500 &&
-    Array.isArray(item.prompts) && item.prompts.length === 3 &&
-    item.prompts.every(function (x) { return typeof x === "string" && x.length <= 300; }) &&
-    item.poll && typeof item.poll.question === "string" &&
-    Array.isArray(item.poll.options) && item.poll.options.length >= 2 && item.poll.options.length <= 4 &&
-    item.poll.options.every(function (x) { return typeof x === "string" && x.length <= 100; }) &&
-    item.mini_game && typeof item.mini_game.name === "string" &&
-    typeof item.mini_game.rules === "string" &&
-    Number.isFinite(item.mini_game.duration_seconds) &&
-    item.mini_game.duration_seconds <= input.duration &&
-    typeof item.transition_back === "string" && item.transition_back.length <= 500 &&
-    typeof item.chat_command_copy === "string" && item.chat_command_copy.length <= 500 &&
-    typeof item.safety_note === "string" && item.safety_note.length <= 500;
+ return item && typeof item.opening === "string" && item.opening.length <= 500 &&
+ Array.isArray(item.prompts) && item.prompts.length === 3 &&
+ item.prompts.every(function (x) { return typeof x === "string" && x.length <= 300; }) &&
+ item.poll && typeof item.poll.question === "string" &&
+ Array.isArray(item.poll.options) && item.poll.options.length >= 2 && item.poll.options.length <= 4 &&
+ item.poll.options.every(function (x) { return typeof x === "string" && x.length <= 100; }) &&
+ item.mini_game && typeof item.mini_game.name === "string" &&
+ typeof item.mini_game.rules === "string" &&
+ Number.isFinite(item.mini_game.duration_seconds) &&
+ item.mini_game.duration_seconds <= input.duration &&
+ typeof item.transition_back === "string" && item.transition_back.length <= 500 &&
+ typeof item.chat_command_copy === "string" && item.chat_command_copy.length <= 500 &&
+ typeof item.safety_note === "string" && item.safety_note.length <= 500;
 }
 ```
 
@@ -310,15 +310,15 @@ function validOutput(item, input) {
 
 ```js
 async function requestOutput(input) {
-  var response = await fetch(API_URL, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(input)
-  });
-  if (!response.ok) throw new Error("API request failed");
-  var data = await response.json();
-  if (!validOutput(data)) throw new Error("Invalid output");
-  return data;
+ var response = await fetch(API_URL, {
+ method: "POST",
+ headers: {"Content-Type": "application/json"},
+ body: JSON.stringify(input)
+ });
+ if (!response.ok) throw new Error("API request failed");
+ var data = await response.json();
+ if (!validOutput(data)) throw new Error("Invalid output");
+ return data;
 }
 ```
 
@@ -335,14 +335,14 @@ var input = readInput();
 var local = fallback(input);
 render(local);
 try {
-  var remote = await requestOutput(input);
-  render(remote);
-  status.textContent = "Segment ready.";
+ var remote = await requestOutput(input);
+ render(remote);
+ status.textContent = "Segment ready.";
 } catch (error) {
-  status.textContent = "The API was unavailable. A curated fallback is ready.";
+ status.textContent = "The API was unavailable. A curated fallback is ready.";
 } finally {
-  busy = false;
-  button.disabled = false;
+ busy = false;
+ button.disabled = false;
 }
 ```
 
@@ -355,34 +355,98 @@ const controller = new AbortController();
 const timer = setTimeout(function () { controller.abort(); }, 8000);
 
 try {
-  let response;
-  if (provider === "gemini") {
-    response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key), {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({contents: [{parts: [{text: prompt}]}]}),
-      signal: controller.signal
-    });
-  } else if (provider === "groq") {
-    response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {"Content-Type": "application/json", "Authorization": "Bearer " + key},
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        temperature: 0.4,
-        max_tokens: 700,
-        response_format: {type: "json_object"},
-        messages: [{role: "user", content: prompt}]
-      }),
-      signal: controller.signal
-    });
-  }
-  if (!response.ok) return null;
+ let response;
+ if (provider === "gemini") {
+ response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key), {
+ method: "POST",
+ headers: {"Content-Type": "application/json"},
+ body: JSON.stringify({contents: [{parts: [{text: prompt}]}]}),
+ signal: controller.signal
+ });
+ } else if (provider === "groq") {
+ response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+ method: "POST",
+ headers: {"Content-Type": "application/json", "Authorization": "Bearer " + key},
+ body: JSON.stringify({
+ model: "llama-3.1-8b-instant",
+ temperature: 0.4,
+ max_tokens: 700,
+ response_format: {type: "json_object"},
+ messages: [{role: "user", content: prompt}]
+ }),
+ signal: controller.signal
+ });
+ }
+ if (!response.ok) return null;
 } catch (error) {
-  return null;
+ return null;
 } finally {
-  clearTimeout(timer);
+ clearTimeout(timer);
 }
 ```
 
 **QA caveat:** Source audit found provider allow-listing, environment-only keys, provider-specific request bodies, authorization, timeout, and null fallback. No live provider/API deployment was available, so runtime behavior remains Unverified.
+
+## 2026-11-18 — RaidReceipt ABI additions
+
+### 1. Output schema validation with bounded fields — Unverified
+
+```javascript
+function validRemote(data) {
+  return data && typeof data.title === "string" && data.title.length <= 40 &&
+    typeof data.verdict === "string" && data.verdict.length <= 220 &&
+    typeof data.squadMessage === "string" && data.squadMessage.length <= 220;
+}
+```
+
+**QA caveat:** Source audit found explicit type and length bounds for all three optional AI output fields. The Vercel API was not deployed or live-tested, so this remains Unverified.
+
+### 2. Versioned encoded share URL — Unverified
+
+```javascript
+function encodedUrl(result) {
+  var data = {
+    v: 1, map: result.input.map, mode: result.input.mode,
+    loadoutCost: result.input.loadoutCost, extractedLoot: result.input.extractedLoot,
+    ammoCost: result.input.ammoCost, consumableCost: result.input.consumableCost,
+    entryCost: result.input.entryCost, survived: result.input.survived,
+    kills: result.input.kills, assists: result.input.assists, revives: result.input.revives,
+    tone: result.input.tone
+  };
+  return SITE_URL + "/?d=" + encodeURIComponent(btoa(JSON.stringify(data)));
+}
+```
+
+**QA caveat:** Source audit found a version marker and encoded user-entered calculation fields for project-path-safe sharing. Browser reload and privacy behavior still require manual verification.
+
+### 3. Deterministic rules-first receipt with optional AI fallback — Unverified
+
+```javascript
+var local = localResult(input);
+render(local);
+try {
+  var remote = await requestAI(input, local.calc);
+  local.copy.title = remote.title;
+  local.copy.verdict = remote.verdict;
+  render(local);
+} catch (error) {
+  errorBox.textContent = "Rules-only receipt ready. Optional AI was unavailable.";
+}
+```
+
+**QA caveat:** Source audit found immediate deterministic rendering, optional remote enhancement, and a user-visible fallback. No production API or browser acceptance run was available.
+
+### 4. Client IP rate window — Unverified
+
+```javascript
+var previous = hits.get(ip) || [];
+previous = previous.filter(function (time) { return now - time < 60000; });
+if (previous.length >= 20) {
+  res.status(429).json({ error: "Rate limit exceeded" });
+  return;
+}
+previous.push(now);
+hits.set(ip, previous);
+```
+
+**QA caveat:** Source audit found a 20-request/60-second in-memory limiter. It is best-effort only and is not durable across serverless instances.

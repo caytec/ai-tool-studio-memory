@@ -48,3 +48,12 @@
 - **Runner-up niches considered:** Gaming challenge/ruleset generator (ChallengeForge); raid handoff assistant (RaidReady); viewer question-to-stream segment planner (SegmentSpark); live audience prompt deck (PromptDeck Live).
 - **Repo/preview URL:** https://github.com/caytec/streamgap-mvp-20261118 ; https://caytec.github.io/streamgap-mvp-20261118/
 - **Release status:** **Deployment incomplete / blocked by GitHub Pages propagation or build failure.** The public repository and root files exist and Pages was configured from `main` root, but the latest build remained `building` and the preview returned HTTP 404 / “There isn't a GitHub Pages site here.” The Vercel API is also not deployed or live-tested, so the end-to-end release is blocked.
+
+## 2026-11-18 — RaidReceipt ABI
+- **Chosen niche:** Arena Breakout: Infinite squad post-raid profit and performance sharing.
+- **Tool name:** RaidReceipt ABI.
+- **Description:** A rules-first post-raid calculator that turns user-entered loadout, cost, loot, survival, and squad-performance values into a shareable receipt showing profit, break-even status, grade, and who carried.
+- **Keywords:** arena breakout infinite profit calculator; ABI raid profit calculator; arena breakout infinite break-even calculator; ABI koen calculator; arena breakout squad profit calculator; ABI raid performance score.
+- **Runner-up niches considered:** RaidRules ABI creator and squad challenge-card generator; ABI raid ruleset generator; ABI gear-fear/confidence raid selector; ABI zero-to-hero planner.
+- **Repo/preview URL:** https://github.com/caytec/raidreceipt-abi-mvp-20261118 ; https://caytec.github.io/raidreceipt-abi-mvp-20261118/
+- **Release status:** **Live, static rules-only MVP.** The previous GitHub Pages 404/building issue is resolved; core calculator files, legal pages, SEO assets, and share functionality are published. Optional AI is not enabled because the Vercel API has not been deployed or connected. Browser execution, accessibility, and download/share behavior still require final manual verification.
