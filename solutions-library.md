@@ -457,15 +457,15 @@ hits.set(ip, previous);
 
 ```js
 function validKit(item, input) {
-  return item && typeof item.overview === "string" && item.overview.length <= 700 &&
-    Array.isArray(item.questions) && item.questions.length === 10 &&
-    item.questions.every(function (x) { return typeof x === "string" && x.length <= 300 && !/[<>]/.test(x); }) &&
-    Array.isArray(item.prompts) && item.prompts.length === input.tracks.length &&
-    item.prompts.every(function (x) { return x && typeof x.track === "string" && typeof x.prompt === "string" && x.prompt.length <= 300 && !/[<>]/.test(x.prompt); }) &&
-    item.poll && typeof item.poll.question === "string" && Array.isArray(item.poll.options) &&
-    item.poll.options.length >= 2 && item.poll.options.length <= 4 &&
-    Array.isArray(item.agenda) && item.agenda.length >= 3 && item.agenda.length <= 5 &&
-    typeof item.rating === "string";
+ return item && typeof item.overview === "string" && item.overview.length <= 700 &&
+ Array.isArray(item.questions) && item.questions.length === 10 &&
+ item.questions.every(function (x) { return typeof x === "string" && x.length <= 300 && !/[<>]/.test(x); }) &&
+ Array.isArray(item.prompts) && item.prompts.length === input.tracks.length &&
+ item.prompts.every(function (x) { return x && typeof x.track === "string" && typeof x.prompt === "string" && x.prompt.length <= 300 && !/[<>]/.test(x.prompt); }) &&
+ item.poll && typeof item.poll.question === "string" && Array.isArray(item.poll.options) &&
+ item.poll.options.length >= 2 && item.poll.options.length <= 4 &&
+ Array.isArray(item.agenda) && item.agenda.length >= 3 && item.agenda.length <= 5 &&
+ typeof item.rating === "string";
 }
 ```
 
@@ -475,20 +475,20 @@ function validKit(item, input) {
 
 ```js
 function normalize(input) {
-  const tracks = Array.isArray(input.tracks) ? input.tracks.map(function (item) {
-    return clean(item, 100);
-  }).filter(Boolean).slice(0, 15) : [];
-  return {
-    album: clean(input.album, 100),
-    artist: clean(input.artist, 100),
-    tracks: tracks,
-    context: ["Friends", "Classroom", "Podcast", "Fan group", "Solo reflection"].includes(input.context) ? input.context : "Friends",
-    depth: ["Casual", "Thoughtful", "Deep dive"].includes(input.depth) ? input.depth : "Thoughtful",
-    favorite: clean(input.favorite, 100),
-    least: clean(input.least, 100),
-    impression: clean(input.impression, 500),
-    spoilers: Boolean(input.spoilers)
-  };
+ const tracks = Array.isArray(input.tracks) ? input.tracks.map(function (item) {
+ return clean(item, 100);
+ }).filter(Boolean).slice(0, 15) : [];
+ return {
+ album: clean(input.album, 100),
+ artist: clean(input.artist, 100),
+ tracks: tracks,
+ context: ["Friends", "Classroom", "Podcast", "Fan group", "Solo reflection"].includes(input.context) ? input.context : "Friends",
+ depth: ["Casual", "Thoughtful", "Deep dive"].includes(input.depth) ? input.depth : "Thoughtful",
+ favorite: clean(input.favorite, 100),
+ least: clean(input.least, 100),
+ impression: clean(input.impression, 500),
+ spoilers: Boolean(input.spoilers)
+ };
 }
 ```
 
@@ -498,8 +498,8 @@ function normalize(input) {
 
 ```js
 function encodedUrl(input, kit) {
-  var data = {v: 1, input: input, kit: kit};
-  return SITE_URL + "?d=" + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))));
+ var data = {v: 1, input: input, kit: kit};
+ return SITE_URL + "?d=" + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))));
 }
 ```
 
@@ -511,11 +511,11 @@ function encodedUrl(input, kit) {
 var local = fallback(input);
 render(local, input);
 try {
-  var remote = await requestKit(input);
-  render(remote, input);
-  status.textContent = "Kit ready. Edit any prompt before sharing.";
+ var remote = await requestKit(input);
+ render(remote, input);
+ status.textContent = "Kit ready. Edit any prompt before sharing.";
 } catch (error) {
-  status.textContent = "The API was unavailable. A rules-only kit is ready.";
+ status.textContent = "The API was unavailable. A rules-only kit is ready.";
 }
 ```
 
@@ -526,11 +526,156 @@ try {
 ```js
 var previous = (hits.get(ip) || []).filter(function (time) { return now - time < 60000; });
 if (previous.length >= 12) {
-  res.status(429).json({error: "Rate limit exceeded"});
-  return;
+ res.status(429).json({error: "Rate limit exceeded"});
+ return;
 }
 previous.push(now);
 hits.set(ip, previous);
 ```
 
 **QA caveat:** Source audit found a 12-request/60-second in-memory limiter. It is best-effort only and is not durable across serverless instances.
+
+## 2026-11-23 — PromiseMatch additions
+
+### 1. PromiseMatch report schema validation — Unverified
+
+```js
+function validReport(report) {
+  var d = report && report.dimensions;
+  return report && Number.isFinite(report.overall_score) &&
+    report.overall_score >= 0 && report.overall_score <= 100 &&
+    ["low", "medium", "high"].indexOf(String(report.confidence).toLowerCase()) >= 0 &&
+    d && ["promise_alignment", "offer_alignment", "audience_alignment",
+      "cta_alignment", "clarity", "trust_continuity"].every(function (key) {
+        return Number.isFinite(d[key]) && d[key] >= 0 && d[key] <= 100;
+      }) &&
+    Array.isArray(report.shared_promises) &&
+    Array.isArray(report.missing_confirmations) &&
+    Array.isArray(report.contradictions) &&
+    Array.isArray(report.claim_warnings) &&
+    Array.isArray(report.priority_fixes) &&
+    Array.isArray(report.revised_hero_variants);
+}
+```
+
+**QA caveat:** Code/live re-audit found explicit score bounds, confidence allow-listing, six dimension bounds, and required array checks. The live static demo does not exercise a deployed API, so provider-runtime behavior remains Unverified.
+
+### 2. PromiseMatch CTA continuity scoring — Verified
+
+```js
+function ctaScore(a, b) {
+  var first = words(a).slice(0, 3).join(" ");
+  var second = words(b).slice(0, 3).join(" ");
+  if (!first || !second) return 45;
+  if (first === second || first.indexOf(second) >= 0 ||
+      second.indexOf(first) >= 0) return 92;
+  if (hasTerm(first, ["start", "try", "get", "download", "buy", "book", "learn", "see"]) &&
+      hasTerm(second, ["start", "try", "get", "download", "buy", "book", "learn", "see"])) return 68;
+  return 38;
+}
+```
+
+**QA note:** Source audit found explicit exact/substring CTA continuity scoring and a deterministic fallback score for different action families. The deployed static page was confirmed; semantic scoring remains heuristic.
+
+### 3. PromiseMatch client duplicate-submit guard and rules-only fallback — Verified
+
+```js
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
+  if (busy) return;
+  if (!form.reportValidity()) return;
+  busy = true;
+  submitButton.disabled = true;
+  status.textContent = "Checking promise, offer, audience, and CTA continuity…";
+  var input = readInput();
+  var local = fallback(input);
+  render(local);
+  requestReport(input).then(function (remote) {
+    render(remote);
+    status.textContent = "Audit complete.";
+  }).catch(function () {
+    status.textContent = "The API was unavailable. A rules-only audit is ready.";
+  }).finally(function () {
+    busy = false;
+    submitButton.disabled = false;
+  });
+});
+```
+
+**QA note:** Live static re-audit confirmed the form workflow, required-field validation, immediate deterministic rendering, disabled submit control, and API-unavailable fallback messaging. Real-browser interaction and deployed API behavior remain untested.
+
+### 4. PromiseMatch provider timeout and safe fallback — Unverified
+
+```js
+async function providerReport(input, base) {
+  var provider = process.env.AI_PROVIDER;
+  var key = provider === "gemini" ? process.env.GEMINI_API_KEY :
+    provider === "groq" ? process.env.GROQ_API_KEY : "";
+  if (!key) return base;
+  var controller = new AbortController();
+  var timer = setTimeout(function () { controller.abort(); }, 8000);
+  try {
+    var response;
+    if (provider === "gemini") {
+      response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key), {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({contents: [{parts: [{text: promptFor(input)}]}]}),
+        signal: controller.signal
+      });
+    } else {
+      response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "Authorization": "Bearer " + key},
+        body: JSON.stringify({model: "llama-3.1-8b-instant", temperature: 0,
+          max_tokens: 1200, response_format: {type: "json_object"},
+          messages: [{role: "user", content: promptFor(input)}]}),
+        signal: controller.signal
+      });
+    }
+    if (!response.ok) return base;
+    var data = await response.json();
+    var text = provider === "gemini" ? data.candidates && data.candidates[0] &&
+      data.candidates[0].content && data.candidates[0].content.parts[0].text :
+      data.choices && data.choices[0] && data.choices[0].message &&
+      data.choices[0].message.content;
+    var parsed = JSON.parse(text || "{}");
+    if (!validReport(parsed)) return base;
+    parsed.overall_score = Math.max(base.overall_score,
+      Math.min(100, Math.round(parsed.overall_score)));
+    parsed.priority_fixes = parsed.priority_fixes.slice(0, 5);
+    parsed.revised_hero_variants = parsed.revised_hero_variants.slice(0, 3);
+    return parsed;
+  } catch (error) {
+    return base;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+```
+
+**QA caveat:** Code audit found provider-specific request bodies, environment-only keys, timeout, JSON parsing, schema validation, and deterministic fallback. No deployed provider endpoint was live-tested; this remains Unverified for production runtime behavior.
+
+### 5. PromiseMatch lightweight client-IP rate window — Unverified
+
+```js
+function clientIp(req) {
+  return String((req.headers &&
+    (req.headers["x-forwarded-for"] || req.headers["x-real-ip"])) ||
+    "unknown").split(",")[0].trim();
+}
+
+function limited(req) {
+  var now = Date.now();
+  var ip = clientIp(req);
+  var prior = (hits.get(ip) || []).filter(function (time) {
+    return now - time < 3600000;
+  });
+  if (prior.length >= 5) return true;
+  prior.push(now);
+  hits.set(ip, prior);
+  return false;
+}
+```
+
+**QA caveat:** Source audit found a five-requests-per-hour in-memory limiter and proxy-header extraction. It is best-effort only, not durable across serverless instances, and requires a durable limiter before public traffic.

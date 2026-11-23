@@ -66,3 +66,12 @@
 - **Runner-up niches considered:** SetlistFlow live-performance setlist transition planning; SongSprint music trivia cards; SongStory Kit behind-the-song promotion; AlbumArc emotional journey maps.
 - **Repo/preview URL:** https://github.com/caytec/albumclub-kit-mvp-20261118 ; https://caytec.github.io/albumclub-kit-mvp-20261118/
 - **Release status:** **Static MVP available for stakeholder review; conditional approval for browser QA only.** The GitHub Pages build was reported as `building` and the preview returned `Site not found · GitHub Pages` / `404` / `There isn't a GitHub Pages site here.` The Vercel API is not deployed or live-tested, so AI generation is unavailable and the demo is rules-only by default. Production approval is blocked by Pages propagation, browser QA, placeholder privacy contact, provider credential hardening, and production-domain configuration.
+
+## 2026-11-23 — PromiseMatch
+- **Chosen niche:** Ad-to-landing-page message matching.
+- **Tool name:** PromiseMatch.
+- **Description:** A no-signup diagnostic that compares advertisement and landing-page hero copy, scores promise, offer, audience, CTA, clarity, and trust continuity, and returns missing confirmations, contradictions, claim warnings, prioritized fixes, revised hero variants, and a privacy-safe share card.
+- **Keywords:** ad to landing page message match checker; landing page message match; PPC landing page audit; ad landing page consistency checker; landing page headline checker; Facebook ad landing page mismatch; Google Ads landing page relevance checker.
+- **Runner-up niches considered:** Ecommerce product-page objection and trust-gap audit; comment-to-content opportunity miner; campaign brief completeness checker; CTA specificity and objection checker.
+- **Repo/preview URL:** https://github.com/caytec/promisematch-mvp-20261123 ; https://caytec.github.io/promisematch-mvp-20261123/
+- **Release status:** **Yellow — controlled static MVP preview only.** The live re-audit found the expected PromiseMatch interface and supporting static assets/pages. The site runs rules-only analysis because `window.API_URL` is intentionally empty; optional AI is not live. The last reported Pages build remained `building` and must be reconfirmed. Public launch remains blocked by browser acceptance testing, privacy-contact completion, AI evidence validation, and stronger API abuse controls.
